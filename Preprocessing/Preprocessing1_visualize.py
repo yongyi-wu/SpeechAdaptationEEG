@@ -144,45 +144,8 @@ fig_savename = fig_dir + 'ave_MMN.png'
 fig.savefig(fig_savename)
 
 
-# #####plot the difference waves instead
-# evoked_block = dict()
-
-# for block in blocks:
-#     for i in range(n_subj):
-#         subj = subj_list[i]
-#         filtered_fname = filtered_dir + "%s_filtered_raw.fif" %(subj)
-#         raw = mne.io.read_raw_fif(filtered_fname, preload = True)
-#         events = mne.find_events(raw)
-#         baseline = (-0.2, 0.0)
-#         epochs = mne.Epochs(raw, events = events, event_id=event_id, tmin = -0.2, tmax = 0.5, baseline=baseline)
-#         evoked_s = epochs['standard/%s'%(block)].average()
-#         evoked_d = epochs['deviant/%s'%(block)].average()
-#         diff = mne.combine_evoked([evoked_s, -evoked_d], weights='nave')
-#         diff.data = evoked_s.data-evoked_d.data
-#         if i == 0:
-#             evoked = [diff]
-#         else:
-#             evoked.append(diff)
-            
-#     sd_block = mne.grand_average(evoked)
-#     evoked_block['%s'%(block)] = sd_block
-    
-# colors = dict(can="Crimson", rev="CornFlowerBlue")
-# picks = [epochs.ch_names.index('A31')]
-
-
-# mne.viz.plot_compare_evokeds(evoked_block, 
-#                              #picks=pick_CZ, 
-#                              picks = picks,
-#                              show_sensors = False,
-#                              colors = colors,
-#                              title = 'Average_FZ difference wave')
-        
-        
-# raw = mne.io.read_raw_fif(filtered_fname, preload = True)
-# exclude_list = raw.info['ch_names'][-16:]
-# raw.drop_channels(exclude_list)
-# raw.set_montage(biosemi_layout)
+####The code below plots the signal for the entire scalp, which we won't need right now.
+####Ignore the code below for now. 
 
 from mne.channels.layout import find_layout
 layout = find_layout(raw.info)
