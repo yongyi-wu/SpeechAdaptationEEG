@@ -5,7 +5,7 @@ We need to inspect the independent components and decide which are bad.
 # ===================
 Dec. 9, 2019, All subjects except 6,7,10 were preprocessed with ICA. 
 # ===================
-
+# new changes
 @author: Charles Wu
 """
 import mne
