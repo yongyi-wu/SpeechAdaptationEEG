@@ -5,7 +5,7 @@ import scipy
 import scipy.io
 import matplotlib.pyplot as plt
 
-tmp_rootdir = '/Users/charleswu/Desktop/MMN/'
+tmp_rootdir = '/Users/jessicaahn/Desktop/'
 raw_dir = tmp_rootdir + "raw_data/"
 resampled_dir = tmp_rootdir + 'resampled_data/'
 filtered_dir = tmp_rootdir + "filtered_raw_data/"
@@ -50,7 +50,7 @@ eeg_chan = eeg_chan + ['A' + str(i+1) for i in range(32)]
 chnames = eeg_chan + ['EXG' + str(i+1) for i in range(5)]
 blocks = ['can', 'rev']
 stimuli = ['standard', 'deviant']
-biosemi_layout = mne.channels.read_montage(tmp_rootdir + 'biosemi_cap_32_M_2_EOG_3.locs')
+biosemi_layout = mne.channels.read_montage(tmp_rootdir + 'SpeechAdaptationEEG/Preprocessing/biosemi_cap_32_M_2_EOG_3.locs')
 biosemi_layout.ch_names = chnames
 event_id = {'standard/can':65321,
             'deviant/can':65322,
