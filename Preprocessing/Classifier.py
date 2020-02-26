@@ -17,17 +17,15 @@ from mne.datasets import sample
 from mne.decoding import (SlidingEstimator, GeneralizingEstimator,
                           cross_val_multiscore, LinearModel, get_coef)
 
+#NOTE : replace ... with your user name of your lap top
+tmp_rootdir = '/Users/.../Desktop/'
 
-tmp_rootdir = '/Users/jessicaahn/Desktop/'
-# raw_dir = tmp_rootdir + "resampled_data/"
-# filtered_dir = tmp_rootdir + "filtered_raw_data/"
-# ica_dir = tmp_rootdir + "ica_raw_data/"
-# word_epoch_dir = tmp_rootdir + "word_epoch_raw_data/"
-# evoked_dir = tmp_rootdir + "evoked/"
-# analysis_dir = tmp_rootdir + "analysis/"
+#path to resampled data
+resampled_dir = tmp_rootdir + 'MNE/resampled_data/'
+
+#path to store classifcation scores
 classify_dir = tmp_rootdir + "MNE/classification_logi_3electro/"
 fig_dir = classify_dir + "Figures/"
-resampled_dir = tmp_rootdir + 'MNE/resampled_data/'
 
 Mastoids = ['M1','M2']
 EOG_list = ['HEOG', 'VEOG']
@@ -59,8 +57,7 @@ event_id = {'standard/can':65321,
             'revTest2':65502
             }
 
-n_subj = len(subj_list) 
-# n_sesh = len(session_list)
+
 ##read the events from the event files instead of the stim channels in the data.
 
 n_subj = len(subj_list)
@@ -82,14 +79,16 @@ for i in range(n_subj):
     epochs = mne.Epochs(raw, events = events, event_id=event_id, 
                         tmin = -0.2, tmax = 0.5, baseline=baseline, preload= True)
 
-    # print(epochs)
+    FZ = epochs['standard/rev'].ch_names.index('A32')
+
     beer = epochs['can/beer'].crop(-0.2, 0.5)
 
     pier = epochs['can/pier'].crop(-0.2, 0.5)
 
-    beer_raw = beer.get_data()
+    beer_raw = beer.get_data()[:, [FZ], :]
 
-    pier_raw = pier.get_data()
+    pier_raw = pier.get_data()[:, [FZ], :]
+
     print('beer raw shape: ', beer_raw.shape)
 
     X = np.concatenate((beer_raw, pier_raw))
@@ -102,53 +101,6 @@ for i in range(n_subj):
     scores = np.mean(scores, axis = 0)
     classify_scores[:,i] = scores
     ave_score_by_subj.append(np.mean(scores))
-
-    # FZ = epochs['deviant/can'].ch_names.index('A32')
-    #
-    # beer = epochs['can/beer'].ch_names.index('A32')
-    #
-    # pier = epochs['can/pier'].ch_names.index('A32')
-
-    # selected_data = epochs_classify.get_data()[:,[FZ],:]
-    #
-    # classify_event = []
-    # for x in map(str,epochs_classify.events[:,2]):
-    #     classify_event.append(int(x[2]))
-
-    # X = selected_data
-    # # y = classify_event
-    # clf = make_pipeline(StandardScaler(), LogisticRegression())
-    # time_decod = SlidingEstimator(clf, n_jobs=1, scoring='roc_auc')
-
-    # scores = cross_val_multiscore(time_decod, X, y, cv=5, n_jobs=1)
-    # Mean scores across cross-validation splits
-    # scores = np.mean(scores, axis=0)
-    # classify_scores = np.append(classify_scores, [scores], axis = 0)
-
-    # score_name = classify_dir + "%s.txt" %(sesh)
-    # np.savetxt(score_name, scores, fmt = '%1.4f')
-
-    # Plot
-    # fig, ax = plt.subplots()
-
-    # ax.plot(beer_raw.times, scores, label='score')
-    # ax.axhline(.5, color='k', linestyle='--', label='chance')
-    # ax.set_xlabel('Times')
-    # ax.set_ylabel('AUC')  # Area Under the Curve
-    # ax.legend()
-    # ax.axvline(.0, color='k', linestyle='-')
-    # ax.set_title('Sensor space decoding')
-    # tmp_fig_name = fig_dir + "%s_%s.png" %(subj)
-    # fig.savefig(tmp_fig_name)
-      # size = np.array(range(epoch_size))
-      # dataframe = pd.DataFrame(np.repeat([[subj],[sesh],[word]],FZ.shape[0], axis=1).T)
-      # dataframe['Trial'] = np.repeat(size + 1, time)
-      # dataframe['TimePoint'] = np.tile(range(-200,601),epoch_size)
-      # dataframe['FZ'] = FZ*10**6 ##change the units from Volt to microvolt
-      # dataframe['CZ'] = CZ*10**6
-      # dataframe['PZ'] = PZ*10**6
-      # dataframe.to_csv(path_or_buf = analysis_dir+'AveAmplitude_byTrial.csv', mode = 'a',header = False, 
-      #              index = False)###for extracting the average amplitude
 
 score_name = classify_dir + "score_by_timepoint.txt"
 np.savetxt(score_name, classify_scores, fmt = '%1.4f')
