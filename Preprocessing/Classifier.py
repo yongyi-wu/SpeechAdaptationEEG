@@ -25,7 +25,7 @@ tmp_rootdir = '/Users/jessicaahn/Desktop/'
 # word_epoch_dir = tmp_rootdir + "word_epoch_raw_data/"
 # evoked_dir = tmp_rootdir + "evoked/"
 # analysis_dir = tmp_rootdir + "analysis/"
-classify_dir = tmp_rootdir + "classification_logi_3electro/"
+classify_dir = tmp_rootdir + "MNE/classification_logi_3electro/"
 fig_dir = classify_dir + "Figures/"
 resampled_dir = tmp_rootdir + 'MNE/resampled_data/'
 
@@ -65,8 +65,7 @@ n_subj = len(subj_list)
 
 n_subj = len(subj_list)
 classify_scores = np.zeros((91, 9))
-score_ave_by_sub = []
-
+ave_score_by_subj = []
 # classify_scores = np.
 #============================================    
 for i in range(n_subj):
@@ -102,8 +101,7 @@ for i in range(n_subj):
     scores = cross_val_multiscore(time_decod, X, Y, cv = 5, n_jobs = 1)
     scores = np.mean(scores, axis = 0)
     classify_scores[:,i] = scores
-    score_ave_by_sub.append(np.mean(scores))
-
+    ave_score_by_subj.append(np.mean(scores))
 
     # FZ = epochs['deviant/can'].ch_names.index('A32')
     #
@@ -126,15 +124,12 @@ for i in range(n_subj):
     # Mean scores across cross-validation splits
     # scores = np.mean(scores, axis=0)
     # classify_scores = np.append(classify_scores, [scores], axis = 0)
-    # score_name = classify_dir + "%s.txt" %(sesh)
 
-    # np.savetxt(score_name, classify_scores, fmt = '%1.4f')
+    # score_name = classify_dir + "%s.txt" %(sesh)
+    # np.savetxt(score_name, scores, fmt = '%1.4f')
+
     # Plot
     # fig, ax = plt.subplots()
-
-
-
-
 
     # ax.plot(beer_raw.times, scores, label='score')
     # ax.axhline(.5, color='k', linestyle='--', label='chance')
@@ -155,6 +150,10 @@ for i in range(n_subj):
       # dataframe.to_csv(path_or_buf = analysis_dir+'AveAmplitude_byTrial.csv', mode = 'a',header = False, 
       #              index = False)###for extracting the average amplitude
 
-plt.plot(subj_list, score_ave_by_sub)
+score_by_time_frame = classify_scores.mean(axis=1)
+score_name = classify_dir + "average_score_by_timepoint.txt"
+np.savetxt(score_name, score_by_time_frame, fmt = '%1.4f')
+
+plt.plot(subj_list, ave_score_by_subj)
 plt.suptitle('Mean Score average by Subject')
 plt.show()
