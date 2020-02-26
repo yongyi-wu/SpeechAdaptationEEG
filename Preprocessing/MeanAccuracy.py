@@ -28,8 +28,7 @@ def mean_confidence_interval(data, confidence=0.95):
     m, se = data, scipy.stats.sem(data)
     #h = se * scipy.stats.t.ppf((1 + confidence) / 2., n-1)
     return m, m-se, m+se##change this to h if you want CIs.
-# pre_sum = mean_confidence_interval(raw_accuracy_pre)
-# post_sum = mean_confidence_interval(raw_accuracy_post)
+
 mean_accuracy_sum = mean_confidence_interval(mean_accuracy)
 
 time = np.add(range(701), 1)
@@ -41,10 +40,7 @@ def plot_mean_and_CI(mean, lb, ub, color_mean=None, color_shading=None):
     plt.fill_between(x, ub, lb,
                      color=color_shading, alpha=.5)
     # plot the mean on top
-    print('mean', mean.shape)
-
     plt.plot(x, mean, color_mean)
-
     plt.plot(x, mean, '-x')
     
 fig = plt.figure(1, figsize=(10, 5.5))
