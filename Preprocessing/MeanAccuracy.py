@@ -13,7 +13,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 tmp_rootdir = '/Users/jessicaahn/Desktop/MNE/'
-classify_dir = tmp_rootdir + 'classification_logi_3electro/average_score_by_timepoint.txt'
+classify_dir = tmp_rootdir + 'classification_logi_3electro/score_by_timepoint.txt'
 
 # fname_pre = classify_dir + 'PRE.txt'
 # fname_post = classify_dir + 'POST.txt'
@@ -22,8 +22,8 @@ classify_dir = tmp_rootdir + 'classification_logi_3electro/average_score_by_time
 
 # mean_accuracy_pre = np.mean(raw_accuracy_pre, axis = 0)
 # mean_accuracy_post = np.mean(raw_accuracy_post, axis = 0)
-mean_accuracy = np.loadtxt(classify_dir)
-
+raw_accuracy = np.loadtxt(classify_dir)
+mean_accuracy = np.mean(raw_accuracy, axis = 1)
 def mean_confidence_interval(data, confidence=0.95):
     ###assuming the input is an np array
     n = len(data)

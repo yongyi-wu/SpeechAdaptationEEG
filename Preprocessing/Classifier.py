@@ -90,7 +90,7 @@ for i in range(n_subj):
     beer_raw = beer.get_data()
 
     pier_raw = pier.get_data()
-    print('beer raw shape: ' , beer_raw.shape)
+    print('beer raw shape: ', beer_raw.shape)
 
     X = np.concatenate((beer_raw, pier_raw))
 
@@ -150,9 +150,8 @@ for i in range(n_subj):
       # dataframe.to_csv(path_or_buf = analysis_dir+'AveAmplitude_byTrial.csv', mode = 'a',header = False, 
       #              index = False)###for extracting the average amplitude
 
-score_by_time_frame = classify_scores.mean(axis=1)
-score_name = classify_dir + "average_score_by_timepoint.txt"
-np.savetxt(score_name, score_by_time_frame, fmt = '%1.4f')
+score_name = classify_dir + "score_by_timepoint.txt"
+np.savetxt(score_name, classify_scores, fmt = '%1.4f')
 
 plt.plot(subj_list, ave_score_by_subj)
 plt.suptitle('Mean Score average by Subject')
