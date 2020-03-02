@@ -58,8 +58,8 @@ for i in range(n_subj):
     #70% training and 30% test
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3, random_state=109)
 
-    #Linear SVM classifier
-    clf = make_pipeline(LinearSVC())
+    #Polynomial SVM classifier
+    clf = make_pipeline(SVC(gamma='auto'))
     time_decod = SlidingEstimator(clf, n_jobs=1, scoring='roc_auc')
     scores = cross_val_multiscore(time_decod, X, Y, cv = 5, n_jobs = 1)
     scores = np.mean(scores, axis=0)
