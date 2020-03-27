@@ -38,10 +38,10 @@ for i in range(5, 8):
 ###################################################################
 ######################## events of interest #######################
 ###################################################################
-event_id = {'Standard/Can':65321,
-            'Deviant/Can':65322,
-            'Standard/Rev':65341,
-            'Deviant/Rev':65342,
+event_id = {'Can/Standard':65321,
+            'Can/Deviant':65322,
+            'Rev/Standard':65341,
+            'Rev/Deviant':65342,
             'Can/ExpSet':65391,
             'Can/ExpSat':65392,
             'Can/Test1':65401,
@@ -52,20 +52,18 @@ event_id = {'Standard/Can':65321,
             'Rev/Test2':65502
             }
 
-Exposure = ['Can/ExpSet',
-            'Can/ExpSat',
-            'Rev/ExpSet',
-            'Rev/ExpSat']
+###two blocks of canonical and reverse
+Block = ['Can', 'Rev']
 
-Test = ['Can/Test1',
-        'Can/Test2',
-        'Rev/Test1',
-        'Rev/Test2']
+####3 event types, exposure, test and mmn stimuli. 
+Exposure = ['ExpSat',
+            'ExpSet']
 
-MMN = ['Standard/Can',
-       'Deviant/Can',
-       'Standard/Rev',
-       'Deviant/Rev']
+Test = ['Test1',
+        'Test2']
+
+MMN = ['Standard',
+       'Deviant']
 
 trigger_list = [130816]
 
