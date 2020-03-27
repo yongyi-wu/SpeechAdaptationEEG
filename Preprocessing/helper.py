@@ -18,7 +18,7 @@ def pick_event_type(eventType1, eventType2, e1color = 'Crimson', e2color = 'Corn
 	###default colors are set
 	###linestyle is fixed
 	event_list = join_events(eventType1, eventType2)
-	color = dict(eventType1[0]=e1color, eventType1[1] = e2color)
-	linestyles = dict(eventType2[0]=e1ltyp, eventtype2[1] = e2ltyp)
+	color = {eventType1[0]:e1color, eventType1[1]:e2color}
+	linestyles = {eventType2[0]:e1ltyp, eventType2[1]:e2ltyp}
 
 	return event_list, color, linestyles

@@ -3,9 +3,11 @@ raw_dir = tmp_rootdir + "raw_data/"
 resampled_dir = tmp_rootdir + 'resampled_data/'
 filtered_dir = tmp_rootdir + "filtered_raw_data/"
 resampled_events_dir = tmp_rootdir + "resampled_events/"
-fig_dir_test = tmp_rootdir + "Plots/test_plot_indiv/"
-fig_dir_exposure = tmp_rootdir + "Plots/exposure_plot_indiv/"
-fig_dir_mmn = tmp_rootdir + "Plots/mmn_plot_indiv/"
+
+fig_dir = tmp_rootdir + 'SpeechAdaptationEEG/Plots/'
+fig_dir_test = fig_dir + "test_plot_indiv/"
+fig_dir_exposure = fig_dir + "exposure_plot_indiv/"
+fig_dir_mmn = fig_dir + "mmn_plot_indiv/"
 
 ###################################################################
 ######################### subject #################################
@@ -13,8 +15,7 @@ fig_dir_mmn = tmp_rootdir + "Plots/mmn_plot_indiv/"
 #============================================
 #subject lists, in canonical-reverse order, reverse-canonical order or full list
 
-can_rev = ['001', '002','003','004', '005', '007', '006', '008', '009', '010', '011', '012',
-'014', '015', '016', '021'] 
+can_rev = ['001', '002','003','004', '005', '007', '006', '008', '009', '010', '011', '012', '015', '016', '021'] #014
 rev_can = ['022', '024', '025', '027', '029', '030', '031', '032', '033']
 # '028' does not have events recorded
 #rev_can = ['029', '030', '031', '032', '033']
@@ -28,6 +29,7 @@ eeg_chan = eeg_chan + ['A' + str(i+1) for i in range(32)]
 Mastoids = ['EXG1','EXG2']
 EOG_list = ['EXG3', 'EXG4', 'EXG5']
 trigger = ['Status']
+FC_cluster = ['A31', 'A32', 'A4', 'A27', 'A5', 'A26', 'A8', 'A23'] #'A2', 'A29'
 
 include = eeg_chan + Mastoids + EOG_list + trigger
 

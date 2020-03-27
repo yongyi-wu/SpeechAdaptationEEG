@@ -47,31 +47,40 @@ print('drop_names = ', drop_names)
 event_id = config.event_id
 
 Block = config.Block
-pick_Exposure = config.Exposure
-pick_Test = config.Test
-pick_MMN = config.MMN
 chan = 'A31'
 
 biosemi_layout = mne.channels.read_montage(tmp_rootdir + 'biosemi_cap_32_M_2_EOG_3.locs')
 biosemi_layout.ch_names = eeg_chan
 
-def plot_indiv_ERP(eventType1, eventType2, picks):
-    event_pick, colors, linestyles = helper.pick_event_type(eventType1, eventType2)
+###function for plotting, with event type and channels.
+###multiple channels will be averaged 
+def plot_ERP(eType, picks):
+    ####This function plots both ERP plots for each subject
+    ####And the averaged ERP across all subjects
+    if eType == 'MMN':
+        eventType2 = config.MMN
+        fig_dir = fig_dir_mmn
+        etype = 'MMN'
+    elif eType == 'Test':
+        eventType2 = config.Test
+        fig_dir = fig_dir_test
+        etype = 'Test'
+    elif eType == 'Exposure':
+        eventType2 = config.Exposure
+        fig_dir = fig_dir_exposure
+        etype = 'Exposure'
+    else:
+        raise Exception('Event type does not exist')
+
+    event_pick, colors, linestyles = helper.pick_event_type(Block, eventType2)
+    print(event_pick)
     evoked_subj = dict()
     evoked = dict()
     n_subj = len(subj_list) 
 
-    if str(eventType2) == 'pick_MMN':
-        fig_dir = fig_dir_mmn
-        etype == 'MMN'
-    elif str(eventType2) == 'pick_Test':
-        fig_dir = fig_dir_test
-        etype == 'Test'
-    else:
-        fig_dir = fig_dir_exposure
-        etype == 'Exposure'
-        
-    #============================================    
+    ###define the paths to save the plots, depending on which event type to plot
+    #============================================  
+    #start the plotting by each subject  
     for i in range(n_subj):
         subj = subj_list[i]
         print(subj)
@@ -97,28 +106,30 @@ def plot_indiv_ERP(eventType1, eventType2, picks):
 
         fig = mne.viz.plot_compare_evokeds(evoked_subj, 
                                      show_sensors = False,
-                                     picks = chan,
+                                     picks = picks,
                                      colors = colors,
                                      linestyles = linestyles,
                                      title = 'Subject_%s_%s'%(subj, picks),
                                      show=False)
-        fig_savename = fig_dir + '%s_%s_%s.png' %(etype, subj, picks)
+        fig_savename = fig_dir + '%s_%s_%s.png' %(subj, etype, picks)
         fig.savefig(fig_savename)
 
+    ##plot an averaged ERP 
     block_etype = dict()
     for j in range(len(event_pick)):
         block_etype[event_pick[j]] = mne.grand_average(evoked[event_pick[j]])
 
     fig1 = mne.viz.plot_compare_evokeds(block_etype, 
                                  show_sensors = False,
-                                 picks = chan,
+                                 picks = picks,
                                  colors = colors,
                                  linestyles = linestyles,
-                                 title = 'Average_FZ',
+                                 title = 'Average_%s'%(picks),
                                  show = False)
     fig_savename = fig_dir + 'ave_%s_%s.png'%(etype, picks)
     fig1.savefig(fig_savename)
 
-    if __name__ = '__main__':
-        plot_indiv_ERP()
+if __name__ == '__main__':
+    ###Execute the function and pick the event type and channel that you are interested in
+    plot_ERP('Test', picks = chan)
 
