@@ -5,40 +5,47 @@ import scipy
 import scipy.io
 import matplotlib.pyplot as plt
 
-tmp_rootdir = '/Users/charleswu/Desktop/MMN/'
-raw_dir = tmp_rootdir + "raw_data/"
-resampled_dir = tmp_rootdir + 'resampled_data/'
-filtered_dir = tmp_rootdir + "filtered_raw_data/"
+###import config and helper files
+import config
+import helper
+
+tmp_rootdir  = config.tmp_rootdir
+raw_dir = config.raw_dir
+resampled_dir = config.resampled_dir
+filtered_dir = config.filtered_dir
+
 l_freq = 0.1
-h_freq = 40
-Mastoids = ['EXG1','EXG2']
-#EOG_list = [u'LhEOG', u'RhEOG', u'LvEOG1', u'LvEOG2', u'RvEOG1']
-EOG_list = ['EXG3', 'EXG4', 'EXG5']
-#ECG_list = [u'ECG']
-#ECG_list = ['ECG']
+h_freq = 32
 
-# drop_names = []
-# for i in range(7):
-#     drop_names.append("misc%d"%(i+1))
+###################################################################
+######################### subject #################################
+###################################################################
+#============================================
+#subject lists, in canonical-reverse order, reverse-canonical order or full list
 
-trigger_list = [130816]
+subj_list = config.subj_list
 
-subj_list = ['001', '002', '003', '004', '005', '008', '009', '011']
 
-event_id = {'standard/can':65321,
-            'deviant/can':65322,
-            'standard/rev':65341,
-            'deviant/rev':65342,
-            'CanExpSet':65391,
-            'CanExpSat':65392,
-            'CanTest1':65401,
-            'CanTest2':65402,
-            'RevExpSet':65491,
-            'RevExpSat':65492,
-            'RevTest1':65501,
-            'RevTest2':65502
-            }
+###################################################################
+########################## eeg channel list #######################
+###################################################################
+eeg_chan = config.eeg_chan
+EOG_list = config.EOG_list
 
+include = config.include
+print('include = ', include)
+
+drop_names = config.drop_names
+print('drop_names = ', drop_names)
+
+###################################################################
+################################ events ###########################
+###################################################################
+
+event_id = config.event_id
+
+biosemi_layout = mne.channels.read_montage(tmp_rootdir + 'biosemi_cap_32_M_2_EOG_3.locs')
+biosemi_layout.ch_names = eeg_chan
 n_subj = len(subj_list) 
 #============================================    
 for i in range(n_subj):
@@ -50,7 +57,9 @@ for i in range(n_subj):
     raw = mne.io.read_raw_fif(resampled_fname, preload = True)
     events = mne.find_events(raw)
     
-    raw.set_eeg_reference('average', projection = True)
+    raw.set_eeg_reference('average', projection = False)
+    print('bad channels = ', raw.info['bads'])
+
     
     raw.filter(l_freq, h_freq)
     raw.save(filtered_fname, overwrite = True)
