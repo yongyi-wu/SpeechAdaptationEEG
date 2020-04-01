@@ -40,7 +40,7 @@ I find [this](https://imotions.com/blog/eeg/) blog to be a good general introduc
 ## EEG preprocessing
 
 You can play around with some sample data that comes with the MNE package like [this](https://mne.tools/stable/auto_examples/io/plot_read_epochs.html#sphx-glr-auto-examples-io-plot-read-epochs-py)
-But I have also uploaded my data to Box and shared with you so you can just download my data and work with it directly!
+But I have also uploaded my data to Box and shared with you so you can just download my data and work with it directly! All of the code you use can be found in the "Preprocessing" folder with individual python scripts for each step, including the config file and helper file with helper functions
 
 #### Downsampled raw data
 The raw form of the EEG data (stored as .bdf binary files right off the Biosemi software) was first downsampled and processed, since there were human errors during recording such as changing the sampling rate and adding channels that were not used. All raw data were downsampled to 128 Hz with only 32 EEG channels(A1-A32) + 5 external channels were included. This code for this step was not uploaded because raw data files can be very large and working with them takes a long time. So I completed this step and stored the data in conventional MNE format, .fif. Therefore, the data that you have access to are .fif data after the downsampling and filtering. Please also note that I also identified EEG channels that are extremely noisy and mark them as bad channels stored in the resampled data. You can examine these channels by first reading the resampled data as 'raw' and then use the line
