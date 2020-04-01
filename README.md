@@ -60,6 +60,13 @@ Note that you can also change the electrode(s) that you want to plot. The defaul
 
 It'd be great to plot the data every step along the way so you can see how the data change. Make sure you change the figure name so that the figures are not overwritten when you plot after every step. 
 
+#### Filtering raw data
+Raw EEG data can be extremely noisy, with a lot of high-frequency activity (fast wiggles in the signal caused by e.g., muscle movement) that's not necessarily of interest for our purpose. So we want to remove the high-frequency noise in order to obtain cleaner data. [This](https://blricrex.hypotheses.org/filtering-introduction) is a good place to read up on EEG filtering. There's a lot of material out there providing different advice on what filter to choose. For this project, we use a filter of 0.1-32Hz because we don't expect to do analysis on high-frequency activities. 
+
+Once you run the Preprocessing2_filter.py file, the filtered data will be stored in a different folder than the resampled data. This way we have a storage space for data every step along the preprocessing pipeline. 
+
+
+
 
 
 
