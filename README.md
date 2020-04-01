@@ -30,10 +30,39 @@ to check your current version of Python or any other software on your computer.
 
 Also read [here](https://mne.tools/stable/install/index.html) to learn more about using mne and enhance your analysis experience.  
 
+For most of the code that you run, you can just use terminal and type
+`python filename` 
+to run the file. But if you need to debug your code or interact with your plots, using an IDE would be helpful. For example, Jupyter notebook would be a great choice to debug and plot. [Spyder](https://www.spyder-ide.org/), which is what I use, is also a great tool. 
+
 ## EEG basics
 I find [this](https://imotions.com/blog/eeg/) blog to be a good general introduction to EEG signals in the brain. It covers a wide range of topics with brief texts from basic neuroscience knowledge to EEG hardware details, all the way to preprocessing and data analysis. Reading this would be very helpful, especially the preprocessing section, for you to understand why we do the preprocessing steps in our code. 
 
 ## EEG preprocessing
 
+You can play around with some sample data that comes with the MNE package like [this](https://mne.tools/stable/auto_examples/io/plot_read_epochs.html#sphx-glr-auto-examples-io-plot-read-epochs-py)
+But I have also uploaded my data to Box and shared with you so you can just download my data and work with it directly!
+
 #### Downsampled raw data
-The raw form of the EEG data (stored as .bdf binary files right off the Biosemi software) was first downsampled and processed, since there were human errors during recording such as changing the sampling rate and adding channels that were not used. All raw data were downsampled to 128 Hz and only 32 EEG channels(A1-A32) + 5 external channels were included. This code for this step was not uploaded because raw data files can be very large and working with them takes a long time. So I completed this step and stored the data in conventional MNE format, .fif. Therefore, the data that you have access to are .fif data after the downsampling and filtering. 
+The raw form of the EEG data (stored as .bdf binary files right off the Biosemi software) was first downsampled and processed, since there were human errors during recording such as changing the sampling rate and adding channels that were not used. All raw data were downsampled to 128 Hz with only 32 EEG channels(A1-A32) + 5 external channels were included. This code for this step was not uploaded because raw data files can be very large and working with them takes a long time. So I completed this step and stored the data in conventional MNE format, .fif. Therefore, the data that you have access to are .fif data after the downsampling and filtering. Please also note that I also identified EEG channels that are extremely noisy and mark them as bad channels stored in the resampled data. You can examine these channels by first reading the resampled data as 'raw' and then use the line
+`raw.info['bads']` in your IDE(Jupyter or Spyder)
+to examine these channels for each participants. 
+
+#### Visualizing raw data
+All the folder paths, parameters, events, channels etc are specified in the config.py folder such that you only need to change them in one place. 
+
+The plots generated will be stored in separate folders and you will need to generate these folders first before you can run the code. Check the config file for 'fig_dir' to see which folder names you need. 
+
+Once you download the Resampled_Raw.zip file that contains all the downsampled data, you can first visualize it using the Preprocessing1_visualization.py file. Note that in this file, you can change the event type that you are trying to plot at the end of the file, by specifying 'MMN', 'Test' or 'Exposure'. 
+
+You can also uncomment the section where plots for each subject are generated if you would like to examine each individual's averaged EEG data. 
+
+Note that you can also change the electrode(s) that you want to plot. The default channel is 'A31', which is right at the top of your scalp and this is one of the electrodes of interest. You can also change this by using a different electrode or adding multiple electrodes, in which case an average across the electrodes will be plotted. For example, in the config file, I specified a fronto-central cluster which we can examine later. So you can use those electrodes in the config file and plot an average across them. 
+
+It'd be great to plot the data every step along the way so you can see how the data change. Make sure you change the figure name so that the figures are not overwritten when you plot after every step. 
+
+
+
+
+
+
+
