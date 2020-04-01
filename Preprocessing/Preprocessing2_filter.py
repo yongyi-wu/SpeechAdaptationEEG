@@ -57,7 +57,8 @@ for i in range(n_subj):
     raw = mne.io.read_raw_fif(resampled_fname, preload = True)
     events = mne.find_events(raw)
     
-    raw.set_eeg_reference('average', projection = False)
+    ##raw.set_eeg_reference('average', projection = False)
+    ##referencing will be done after ICA
     print('bad channels = ', raw.info['bads'])
 
     

@@ -1,9 +1,11 @@
+###All the folder paths you need
 tmp_rootdir = '/Users/charleswu/Desktop/MMN/'
 raw_dir = tmp_rootdir + "raw_data/"
 resampled_dir = tmp_rootdir + 'resampled_data/'
 filtered_dir = tmp_rootdir + "filtered_raw_data/"
 resampled_events_dir = tmp_rootdir + "resampled_events/"
 
+###folder paths for storing figures/plots
 fig_dir = tmp_rootdir + 'SpeechAdaptationEEG/Plots/'
 fig_dir_test = fig_dir + "test_plot_indiv/"
 fig_dir_exposure = fig_dir + "exposure_plot_indiv/"
@@ -13,9 +15,10 @@ fig_dir_mmn = fig_dir + "mmn_plot_indiv/"
 ######################### subject #################################
 ###################################################################
 #============================================
+
 #subject lists, in canonical-reverse order, reverse-canonical order or full list
 
-can_rev = ['001', '002','003','004', '005', '007', '006', '008', '009', '010', '011', '012', '015', '016', '021'] #014
+can_rev = ['001', '002','003','004', '005', '007', '006', '008', '009', '010', '011', '012', '015', '016', '021'] #014 rejected
 rev_can = ['022', '024', '025', '027', '029', '030', '031', '032', '033']
 # '028' does not have events recorded
 #rev_can = ['029', '030', '031', '032', '033']
