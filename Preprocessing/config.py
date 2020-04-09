@@ -2,14 +2,18 @@
 tmp_rootdir = '/Users/charleswu/Desktop/MMN/'
 raw_dir = tmp_rootdir + "raw_data/"
 resampled_dir = tmp_rootdir + 'resampled_data/'
-filtered_dir = tmp_rootdir + "filtered_raw_data/"
-resampled_events_dir = tmp_rootdir + "resampled_events/"
+filtered_dir = tmp_rootdir + 'filtered_raw_data/'
+resampled_events_dir = tmp_rootdir + 'resampled_events/'
+ica_dir = tmp_rootdir + 'ica_raw_data/'
+epoch_dir = tmp_rootdir + 'epoch_data/'
+evoked_dir = tmp_rootdir + 'evoked_data/'
 
 ###folder paths for storing figures/plots
 fig_dir = tmp_rootdir + 'SpeechAdaptationEEG/Plots/'
-fig_dir_test = fig_dir + "test_plot_indiv/"
-fig_dir_exposure = fig_dir + "exposure_plot_indiv/"
-fig_dir_mmn = fig_dir + "mmn_plot_indiv/"
+fig_dir_test = fig_dir + 'test_plot_indiv/'
+fig_dir_exposure = fig_dir + 'exposure_plot_indiv/'
+fig_dir_mmn = fig_dir + 'mmn_plot_indiv/'
+fig_evoked_dir = fig_dir + 'plot_evoked/'
 
 ###################################################################
 ######################### subject #################################

@@ -1,4 +1,5 @@
-###Add comment
+###This file will save all epoched data as well as 
+###evoked data for the events of interest
 import mne
 import numpy as np
 import scipy
@@ -13,9 +14,17 @@ tmp_rootdir  = config.tmp_rootdir
 raw_dir = config.raw_dir
 resampled_dir = config.resampled_dir
 filtered_dir = config.filtered_dir
+ica_dir = config.ica_dir
+epoch_dir = config.epoch_dir
+evoked_dir = config.evoked_dir
+
+##fig dirs
 fig_dir_mmn = config.fig_dir_mmn
 fig_dir_test = config.fig_dir_test
 fig_dir_exposure = config.fig_dir_exposure
+
+fig_evoked_dir = config.fig_evoked_dir
+
 
 ###################################################################
 ######################### subject #################################
@@ -23,39 +32,31 @@ fig_dir_exposure = config.fig_dir_exposure
 #============================================
 #subject lists, in canonical-reverse order, reverse-canonical order or full list
 
-can_rev = config.can_rev
-rev_can = config.rev_can
 subj_list = config.subj_list
-
 
 ###################################################################
 ########################## eeg channel list #######################
 ###################################################################
 eeg_chan = config.eeg_chan
 EOG_list = config.EOG_list
+FC_cluster = config.FC_cluster
 
 include = config.include
-print('include = ', include)
 
 drop_names = config.drop_names
-print('drop_names = ', drop_names)
-
 ###################################################################
 ################################ events ###########################
 ###################################################################
-
-event_id = config.event_id
-
 Block = config.Block
-chan = 'A31'
+event_id = config.event_id
 
 biosemi_layout = mne.channels.read_montage(tmp_rootdir + 'biosemi_cap_32_M_2_EOG_3.locs')
 biosemi_layout.ch_names = eeg_chan
-
-###function for plotting, with event type and channels.
-###multiple channels will be averaged 
-def plot_ERP(eType, figName, picks = 'A31'):
-    ####This function plots both ERP plots for each subject
+n_subj = len(subj_list) 
+    
+def save_evoked(eType, picks = 'A31', save_epoch = False):
+    ####This function saves and plots epoched data for all subjects
+    ####picks is the channel name and chan is the channel list
     ####And the averaged ERP across all subjects
     if eType == 'MMN':
         eventType2 = config.MMN
@@ -69,13 +70,6 @@ def plot_ERP(eType, figName, picks = 'A31'):
     else:
         raise Exception('Event type does not exist')
 
-    if figName == 'resampled':
-        raw_dir = resampled_dir
-    elif figName == 'filtered':
-        raw_dir = filtered_dir
-    else: 
-        raise Exception('Preprocessing step does not exist')
-
     event_pick, colors, linestyles = helper.pick_event_type(Block, eventType2)
     print(event_pick)
     evoked_subj = dict()
@@ -88,18 +82,23 @@ def plot_ERP(eType, figName, picks = 'A31'):
     for i in range(n_subj):
         subj = subj_list[i]
         print(subj)
-        raw_fname = raw_dir + "%s_%s_raw.fif" %(subj, figName)
+        raw_fname = ica_dir + "%s_after_ica_raw.fif" %(subj)
         
-        raw = mne.io.read_raw_fif(raw_fname, preload = True)
+        raw = mne.io.Raw(raw_fname, preload = True)
         events = mne.find_events(raw, shortest_event = 1)
+        raw.set_eeg_reference('average', projection = False)
         raw.pick_types(include = eeg_chan, exclude = raw.info['bads'])
 
         #raw.filter(0.1, 32)
         #raw.set_eeg_reference('average', projection = False)
             
         baseline = (-0.2, 0.0)
-        epochs = mne.Epochs(raw, picks = picks, events = events, event_id=event_id, 
+        epochs = mne.Epochs(raw, events = events, event_id=event_id, 
                             tmin = -0.2, tmax = 0.5, baseline=baseline)
+        epoch_fname = epoch_dir + '%s_epoch.fif' %(subj)
+        if save_epoch == True:
+            epochs.save(epoch_fname)
+
 
         for j in range(len(event_pick)):
             evoked_subj[event_pick[j]] = epochs[event_pick[j]].average()
@@ -109,15 +108,15 @@ def plot_ERP(eType, figName, picks = 'A31'):
                 evoked[event_pick[j]].append(evoked_subj[event_pick[j]])
 
         #uncomment if you want plots for each subject
-        # fig = mne.viz.plot_compare_evokeds(evoked_subj, 
-        #                              show_sensors = False,
-        #                              picks = picks,
-        #                              colors = colors,
-        #                              linestyles = linestyles,
-        #                              title = 'Subject_%s_%s_%s'%(subj, picks, figName),
-        #                              show=False)
-        # fig_savename = fig_dir + '%s_%s_%s.png' %(subj, figName, picks)
-        # fig.savefig(fig_savename)
+        fig = mne.viz.plot_compare_evokeds(evoked_subj, 
+                                     show_sensors = False,
+                                     picks = picks,
+                                     colors = colors,
+                                     linestyles = linestyles,
+                                     title = 'Subjec_FCcluster_%s'%(eType),
+                                     show=False)
+        fig_savename = fig_dir + '%s_%s_FC.png' %(subj, eType)
+        fig.savefig(fig_savename)
 
     ##plot an averaged ERP 
     block_etype = dict()
@@ -129,12 +128,13 @@ def plot_ERP(eType, figName, picks = 'A31'):
                                  picks = picks,
                                  colors = colors,
                                  linestyles = linestyles,
-                                 title = 'Average_%s_%s_%s'%(picks, eType, figName),
+                                 title = 'Average_FCcluster_%s'%(eType),
                                  show = False)
-    fig_savename = fig_dir + 'ave_%s_%s.png'%(picks, figName)
+    fig_savename = fig_evoked_dir  + 'ave_%s_FC.png'%(eType)
     fig1.savefig(fig_savename)
 
 if __name__ == '__main__':
     ###Execute the function and pick the event type and channel that you are interested in
-    plot_ERP('Exposure', 'resampled')
+    save_evoked('MMN', picks = FC_cluster)
+    
 
