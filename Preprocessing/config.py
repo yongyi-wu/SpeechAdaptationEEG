@@ -14,6 +14,7 @@ fig_dir_test = fig_dir + 'test_plot_indiv/'
 fig_dir_exposure = fig_dir + 'exposure_plot_indiv/'
 fig_dir_mmn = fig_dir + 'mmn_plot_indiv/'
 fig_evoked_dir = fig_dir + 'plot_evoked/'
+fig_cluster = fig_dir + 'diffwave_cluster/'
 
 ###################################################################
 ######################### subject #################################
