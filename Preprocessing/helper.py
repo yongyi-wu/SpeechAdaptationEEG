@@ -60,8 +60,6 @@ def permutation_test(data, statistic = 'difference', n_perm = 10000):
 	n = np.shape(cond1)[0]
 	p = np.shape(cond1)[1]
 	p_vals = []
-	test_stat = []
-
 
 	if statistic == 'min':
 		##testing whether the mean peak amplitude is different between conditions
@@ -82,23 +80,27 @@ def permutation_test(data, statistic = 'difference', n_perm = 10000):
 		p_vals = 1-np.sum(obs < test_stat)/len(test_stat)
 
 	elif statistic == 'difference':
+		###Note that for difference and cor statistic, the obs and test-stats are only returned
+		###for the last iteration so they are not for every time point
 		for t in range(p):
+			test_stat = []
+			obs = np.mean(cond1[:, t])-np.mean(cond2[:, t])
 			for i in range(n_perm):
 				s = np.random.permutation(np.concatenate((cond1[:, t], cond2[:, t])))
 				stat = np.mean(s[:n]) - np.mean(s[n:])				
 				test_stat.append(stat)
-			obs = np.mean(cond1[:, t])-np.mean(cond2[:, t])
 			p_val = 1-np.sum(obs < test_stat)/len(test_stat)
 			p_vals.append(p_val)
 
 	elif statistic == 'cor': ##not tested yet
 		for t in range(p):
+			test_stat = []
+			obs = pearsonr(cond1[:, t], cond2[:, t])[0]
 			for i in range(n_perm):
 				s = np.random.permutation(np.concatenate((cond1[:, t], cond2[:, t])))
 				stat = pearsonr(s[:n], s[n:])[0] ##not tested yet
 				test_stat.append(stat)
 
-			obs = pearsonr(cond1[:, t], cond2[:, t])[0]
 			p_val = 1-np.sum(obs > test_stat)/len(test_stat)
 			p_vals.append(p_val)
 

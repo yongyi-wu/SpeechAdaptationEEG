@@ -1,5 +1,19 @@
-###This file will save all epoched data as well as 
-###evoked data for the events of interest
+################################################################################################
+################################################################################################
+################################################################################################
+################################################################################################
+
+### This analysis is an extension of the cluster-based permutation analysis, aimed at finding the 
+### specific time points where the canonical/reverse difference amplitudes differ.
+### It uses an FDR correction to test all time points in the 200-300 time window suggested by Moberly et al (2014)
+### to show divergence in the difference amplitude. 
+### The result shows difference in both 201-240ms and 260-300ms (corresponding to the early AND late time windows)
+### in Moberly et al (2014)
+
+################################################################################################
+################################################################################################
+################################################################################################
+################################################################################################
 import mne
 import numpy as np
 import matplotlib.pyplot as plt
@@ -77,13 +91,14 @@ for i in range(n_subj):
 diff_can = np.array(diff_can)
 diff_rev = np.array(diff_rev)
 
-p_vals = np.array(helper.permutation_test([diff_rev, diff_can]))
+p_vals, obs, test_stat = helper.permutation_test([diff_can, diff_rev])
 # p_adj = multipletests(, alpha = 0.05, method = 'fdr_bh') 
 #p_adj = multipletests(p_vals[50:77], alpha = 0.05, method = 'fdr_bh')
 
 times = raw.times
+print(times[52], times[64])
 
-window = np.arange(52, 64) #52:64, 200-300  #45:78 150-400
+window = np.arange(52, 64) #52:64, 200-300
 p_final = np.zeros(np.shape(p_vals))
 p_adj = multipletests(p_vals[window], alpha = 0.05, method = 'fdr_bh')
 ##corresponds to 200 to 300ms
@@ -124,9 +139,9 @@ plt.legend(['Canonical_Difference_wave', 'Reverse_Difference_wave', 'FDR p-value
 plt.ylabel("Difference waves amplitudes (uV)")
 plt.xlabel("time (s)")
 plt.yticks(np.arange(-1e-06,1.25e-06,25e-08), np.arange(-1,1.25,0.25))
-figname = fig_diffcluster + 'Cluster_Diff.png'
+figname = fig_diffcluster + 'FDR_diff_200_300.png'
 print(figname)
-#plt.savefig(figname)
+plt.savefig(figname)
 plt.show()
 plt.close('all')
     

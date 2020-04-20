@@ -81,7 +81,7 @@ rev_stand = grand_ave[:,2,start:end]
 rev_dev = grand_ave[:,3,start:end]
 
 p_val, obs, test_stat = np.array(helper.permutation_test([can_dev, can_stand], statistic = 'min'))
-print(p_val)
+print(p_val) ###p = 0.059. Note that the pvals are stochastic and I didn't fix a random state here so it will be slight different every time I run it. 
 ## calculate the mean peak amplitude first and find a marginal difference between can and rev peak amplitudes
 ## with p = 0.06
 

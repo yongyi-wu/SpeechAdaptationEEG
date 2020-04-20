@@ -3,11 +3,14 @@
 ################################################################################################
 ################################################################################################
 
-### This analysis explores the difference waves in the canonical/reverse blocks using a permutation-based
-### cluster test to find the largest cluster that shows a difference between canonical and reverse
-### This is meant to be an exploratory analysis to confirm whether there are time points showing amplitude
-### difference between the two blocks, not to specify the exact time points of where the difference
-### happens. To find the more accurate time points, refer to the next analysis using FDR correction
+### This analysis is a first step, confirmatory analysis to check the existent of an MMN effect at least
+### in the canonical block (test stimuli differing along the secondary dimension). It finds the mean peak amplitudes
+### in the time window 150-350ms after stimulus onset in the canonical_standard and canonical_deviant conditions 
+### and then permute each individual's peak amplitude to generate the null distribution. 
+### Finally, it compares the observed statistic with the null distribution and make an inferential statement about 
+### whether the observed difference is significantly different than 0 or not. 
+### The result show a marginal significance between the mean peak amplitude of standard and deviant trials in the canonical
+### block 
 
 ################################################################################################
 ################################################################################################
@@ -25,6 +28,7 @@ import pandas as pd
 from mne import io
 from mne.stats import permutation_cluster_test
 from mne.datasets import sample
+from statsmodels.stats.multitest import multipletests
 
 ###import config and helper files
 import config
@@ -69,57 +73,32 @@ MMN = config.MMN
 ### we will start with a cluster-based permutation test on the average of the fronto-central electrodes
 ### we will only do this analysis on the MMN data
 
-diff_can = []
-diff_rev = []
+grand_ave = np.empty((0,4,91))
 for i in range(n_subj):
     subj = subj_list[i]
     print(subj)
     raw_fname = epoch_dir + "%s_epoch.fif" %(subj)
-    ###read from saved evoked data
+    ###read from saved epoched data
     raw = mne.read_epochs(raw_fname, proj = False, preload = True)
     event = helper.join_events(Block, MMN)
     chan_idx = [raw[event[0]].ch_names.index(ch) for ch in FC_cluster]
     epoch = []
     for i in range(len(event)):
         epoch.append(raw[event[i]].average().data)
-    can_ave, rev_ave = helper.get_mean_diffwave(chan_idx, epoch)
-    diff_can.append(can_ave)
-    diff_rev.append(rev_ave)
+    ave = helper.get_mean_evoked(chan_idx, epoch)
+    grand_ave = np.append(grand_ave, [ave], axis = 0)
 
-diff_can = np.array(diff_can)
-diff_rev = np.array(diff_rev)
+##45:71 take the time window from 150-350ms suggested in Moberly et al
+start = 45
+end = 71
+can_stand = grand_ave[:,0,start:end]
+can_dev = grand_ave[:, 1, start:end]
+rev_stand = grand_ave[:,2,start:end]
+rev_dev = grand_ave[:,3,start:end]
 
-times = raw.times
-#np.arange(-0.203125,0.5,0.0078125)
-T_obs, clusters, cluster_p_values, H0 = \
-    permutation_cluster_test([diff_can, diff_rev], n_permutations=5,
-                             tail=1, n_jobs=1)
-channel = 'FC_cluster'
+p_val, obs, test_stat = np.array(helper.permutation_test([can_dev, can_stand], statistic = 'min'))
+print(p_val) 
+## calculate the mean peak amplitude first and find a marginal difference between can and rev peak amplitudes
+###p = 0.059. Note that the pvals are stochastic and I didn't fix a random state here so it will be slight different every time I run it. 
 
-#plt.subplot(212)
-    # else:
-    #     plt.axvspan(times[c.start], times[c.stop - 1], color=(0.3, 0.3, 0.3),
-    #                 alpha=0.3)
-#hf = 
-#plt.subplot(211)
-plt.title('Channel : Fronto_central_cluster')
-plt.plot(times, diff_can.mean(axis=0), color = 'Crimson')
-plt.plot(times, diff_rev.mean(axis=0), color = 'CornFlowerBlue')
-for i_c, c in enumerate(clusters):
-    c = c[0]
-    if cluster_p_values[i_c] <= 0.05:
-        h = plt.axvspan(times[c.start], times[c.stop - 1],
-                        color='r', alpha=0.3)
-plt.legend(['Canonical_Difference_wave', 'Reverse_Difference_wave', 'cluster p-value < 0.05'], loc = 'upper left')
-
-         #label="Difference wave contrast")
-plt.ylabel("Difference waves amplitudes (uV)")
-plt.xlabel("time (s)")
-plt.yticks(np.arange(-1e-06,1.25e-06,25e-08), np.arange(-1,1.25,0.25))
-figname = fig_diffcluster + 'Cluster_Diff.png'
-print(figname)
-#plt.savefig(figname)
-plt.show()
-plt.close('all')
-    
 
