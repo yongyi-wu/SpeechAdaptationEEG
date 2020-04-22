@@ -3,9 +3,10 @@
 ################################################################################################
 ################################################################################################
 
-### This analysis explores the correlation between the amplitude and CLASSIFICATION ACCURACY between the 
-### reverse block exposure stimuli and the reverse test stimuli. Specifically, the correlation was performed by 
-### time point and all the correlation coefficients are corrected using FDR. 
+### This analysis explores the time windows for the down-weighting effect as suggested by 
+### Toscano & Mcmurray, 2010: P3, 300m-800m seems sensitive to the category distinctions, which
+### is useful in this context because of the behavioral down-weighting we observe in previous DBSL
+### studies. An additional exploratory analysis of the N1 window was also done. 
 
 ################################################################################################
 ################################################################################################
@@ -64,67 +65,51 @@ drop_names = config.drop_names
 Block = config.Block
 event_id = config.event_id
 Test = config.Test
-Exposure = config.Exposure
     
 ### we will start with a cluster-based permutation test on the average of the fronto-central electrodes
 ### we will only do this analysis on the MMN data
-event_test = helper.join_events(Block, Test)
-event_exposure = helper.join_events(Block, Exposure)
-event = event_test + event_exposure
-print(event)
-grand_ave = np.empty((0,8,129))
+
+grand_ave = np.empty((0,4,129))
 for i in range(n_subj):
     subj = subj_list[i]
     print(subj)
     raw_fname = epoch_dir + "%s_epoch_M.fif" %(subj)
     ###read from saved epoched data
     raw = mne.read_epochs(raw_fname, proj = False, preload = True)
-
+    event = helper.join_events(Block, Test)
     chan_idx = [raw[event[0]].ch_names.index(ch) for ch in parietal_cluster]
-
     epoch = []
-    for j in range(len(event)):
-        epoch.append(raw[event[j]].average().data)
-
+    for i in range(len(event)):
+        epoch.append(raw[event[i]].average().data)
     ave = helper.get_mean_evoked(chan_idx, epoch)
     grand_ave = np.append(grand_ave, [ave], axis = 0)
 
-## 26- take the time window from 0-800ms suggested in Moberly et al
-times = raw.times
-start = 26
-end = 71
-rev_test2 = grand_ave[:,2,start:]
-rev_test1 = grand_ave[:,3,start:]
-rev_exp_P = grand_ave[:,6,start:]
-rev_exp_B = grand_ave[:,7,start:]
+##64:129 take the time window from 300-800ms suggested in Toscano & Mcmurray, 2010
+start = 64
+end = 129
+can_test2 = grand_ave[:,0,start:end]
+can_test1 = grand_ave[:, 1, start:end]
+rev_test2 = grand_ave[:,2,start:end]
+rev_test1 = grand_ave[:,3,start:end]
 
-rev_test_diff = np.subtract(rev_test2, rev_test1)
+can_diff = np.subtract(can_test2, can_test1)
+rev_diff = np.subtract(rev_test2, rev_test1)
 
-rev_exp = np.mean(grand_ave[:,6:8,start:], axis = 1)
-# np.subtract(rev_exp_P, rev_exp_B)
-# np.mean(grand_ave[:,6:8,start:], axis = 1)
-# rev_exp_P 
-#np.subtract(rev_exp_P, rev_exp_B)
-cor_mat, p_vals = helper.cor_mat(rev_test_diff, rev_exp)
-# cor_mat, p_vals = helper.cor_mat(rev_test_diff, rev_exp)
+p_val, obs, test_stat = helper.permutation_test([can_diff, rev_diff], statistic = 'mean')
+print(p_val) 
+## with p = 0.008
 
-fig, ax = plt.subplots()
-im = ax.imshow(cor_mat, interpolation='lanczos', origin='lower', cmap='RdBu_r',
-                extent=raw.times[[26, -1, 26, -1]], vmin=-1, vmax=1)
+####Look at 75-127ms for N1 responses
+start = 35
+end = 42
+can_N_test2 = grand_ave[:,0,start:end]
+can_N_test1 = grand_ave[:, 1, start:end]
+rev_N_test2 = grand_ave[:,2,start:end]
+rev_N_test1 = grand_ave[:,3,start:end]
 
-# fig, ax = plt.subplots()
-# im = ax.imshow(p_adj[1], interpolation='lanczos', origin='lower', cmap='RdBu_r',
-#                 extent=raw.times[[26, -1, 26, -1]], vmin=0, vmax=0.1)
+can_diff = np.subtract(can_N_test2, can_N_test1)
+rev_diff = np.subtract(rev_N_test2, rev_N_test1)
 
-ax.set_xlabel('Test (s)')
-ax.set_ylabel('Exposure (s)')
-ax.set_title('Correlation Map')
-ax.axvline(0, color='k')
-ax.axhline(0, color='k')
-plt.colorbar(im, ax=ax)
-plt.show()
-
-p_rej, p_adj = helper.FDR_2D(p_vals)
-
+p_val, obs, test_stat = helper.permutation_test([can_diff, rev_diff], statistic = 'mean')
 
 

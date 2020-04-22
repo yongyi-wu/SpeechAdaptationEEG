@@ -1,15 +1,22 @@
 import pandas as pd
 import numpy as np
 import random
+
 from scipy.stats import pearsonr
+import scipy, time
+import scipy.io
+import scipy.stats
+
+from statsmodels.stats.multitest import multipletests
+import matplotlib.pyplot as plt
 
 def join_events(eventType1, eventType2):
       ###joins two event types in two vectors of strings 
       ###to full join into the desired events
       full_events = []
-      for i in range(len(eventType1)):
-            for j in range(len(eventType2)):
-                  full_events.append('/'.join([eventType1[i], eventType2[j]]))
+      for i in eventType1:
+            for j in eventType2:
+                  full_events.append('/'.join([i, j]))
       return full_events
 
 
@@ -72,8 +79,28 @@ def permutation_test(data, statistic = 'difference', n_perm = 10000):
 		# 	test_stat.append(stat)
 		# p_vals = 1-np.sum(obs < test_stat)/len(test_stat)
 		obs = np.mean(np.amin(cond1, axis = 1)) - np.mean(np.amin(cond2, axis = 1))
+		test_stat = []
 		for i in range(n_perm):
 			cat = np.concatenate((np.amin(cond1, axis = 1), np.amin(cond2, axis = 1)))
+			s = np.random.permutation(cat)
+			stat = np.mean(s[:n]) - np.mean(s[n:])
+			test_stat.append(stat)
+		p_vals = 1-np.sum(obs < test_stat)/len(test_stat)
+
+	if statistic == 'mean':
+		##testing whether the mean amplitude is different between conditions
+		# obs = np.amin(np.mean(cond1, axis = 0)) - np.amin(np.mean(cond2, axis = 0))
+		# for i in range(n_perm):
+		# 	cat = np.concatenate((cond1, cond2), axis = 0)
+		# 	idx = np.arange(n*2)
+		# 	s = np.random.permutation(idx)
+		# 	stat = np.amin(np.mean(cat[s[:n], :], axis = 0)) - np.amin(np.mean(cat[s[n:], :], axis = 0))
+		# 	test_stat.append(stat)
+		# p_vals = 1-np.sum(obs < test_stat)/len(test_stat)
+		obs = np.mean(np.mean(cond1, axis = 1) - np.mean(cond2, axis = 1))
+		test_stat = []
+		for i in range(n_perm):
+			cat = np.concatenate((np.mean(cond1, axis = 1), np.mean(cond2, axis = 1)))
 			s = np.random.permutation(cat)
 			stat = np.mean(s[:n]) - np.mean(s[n:])
 			test_stat.append(stat)
@@ -133,5 +160,43 @@ def get_clusters(adjusted_p_vals):
 
 	return name, np.array(c)
 
+
+def cor_mat(e1, e2):
+	### assuming both e1 and e2 are n * t matrices where n = subject n
+	### t = time points of EEG data
+	t1 = np.shape(e1)[1]
+	t2 = np.shape(e2)[1]
+	matrix = np.empty([t1, t2])
+	p_vals = np.empty([t1, t2])
+
+	for i in reversed(range(t1)):
+		for j in range(t2):
+			matrix[i, j], p_vals[i, j] = pearsonr(e1[:, i], e2[:, j])
+	return matrix, p_vals
+
+def FDR_2D(p_vals):
+	d = np.shape(p_vals)[0]
+	p = p_vals.flatten()
+	p_rej, p_adj, p1, p2 = multipletests(p)
+	p_rej = np.reshape(p_rej, (d, d))
+	p_adj = np.reshape(p_adj, (d, d))
+	return p_rej, p_adj
+
+
+def mean_confidence_interval(data, confidence=0.95):
+    ###assuming the input is an np array
+    n = len(data)
+    m, se = np.mean(data, axis = 0), scipy.stats.sem(data)
+    #h = se * scipy.stats.t.ppf((1 + confidence) / 2., n-1)
+    return m, m-se, m+se##change this to h if you want CIs.
+
+
+def plot_mean_and_CI(mean, lb, ub, color_mean=None, color_shading=None):
+    # plot the shaded range of the confidence intervals
+    x = np.subtract(range(mean.shape[0]), 200)
+    plt.fill_between(np.subtract(range(mean.shape[0]), 200), ub, lb,
+                     color=color_shading, alpha=.5)
+    # plot the mean on top
+    plt.plot(x, mean, color_mean)
 
 

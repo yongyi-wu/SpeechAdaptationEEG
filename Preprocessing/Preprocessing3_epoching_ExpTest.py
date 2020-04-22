@@ -87,7 +87,8 @@ def save_evoked(eType, picks = 'A31', save_epoch = False):
         
         raw = mne.io.Raw(raw_fname, preload = True)
         events = mne.find_events(raw, shortest_event = 1)
-        raw.set_eeg_reference('average', projection = False)
+        raw.set_eeg_reference(['EXG1', 'EXG2'], projection = False) ###use the average of two mastoids 
+        ###as reference like in Toscano McMurray 2010 rather than the average. 
         raw.pick_types(include = eeg_chan, exclude = raw.info['bads'])
 
         #raw.filter(0.1, 32)
@@ -95,8 +96,8 @@ def save_evoked(eType, picks = 'A31', save_epoch = False):
             
         baseline = (-0.2, 0.0)
         epochs = mne.Epochs(raw, events = events, event_id=event_id, 
-                            tmin = -0.2, tmax = 0.5, baseline=baseline)
-        epoch_fname = epoch_dir + '%s_epoch.fif' %(subj)
+                            tmin = -0.2, tmax = 0.8, baseline=baseline)
+        epoch_fname = epoch_dir + '%s_epoch_M.fif' %(subj) 
         if save_epoch == True:
             epochs.save(epoch_fname)
 
