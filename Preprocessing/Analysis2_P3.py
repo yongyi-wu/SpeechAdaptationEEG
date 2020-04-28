@@ -110,6 +110,64 @@ rev_N_test1 = grand_ave[:,3,start:end]
 can_diff = np.subtract(can_N_test2, can_N_test1)
 rev_diff = np.subtract(rev_N_test2, rev_N_test1)
 
-p_val, obs, test_stat = helper.permutation_test([can_diff, rev_diff], statistic = 'mean')
+p_val1, obs, test_stat = helper.permutation_test([can_diff, rev_diff], statistic = 'mean')
+print(p_val1)
 
 
+
+t = np.shape(grand_ave)[2]
+j = 0
+df1 = pd.DataFrame()
+df = pd.DataFrame(columns = ['Subject', 'Block', 'Cond', 'Signal'])
+for block in Block:
+    for cond in Test:
+        for i in range(n_subj):
+            print(cond, block)
+            df['Subject'] = np.repeat(int(subj_list[i]), t)
+            df['Block'] = np.repeat(block, t)
+            df['Cond'] = np.repeat(cond, t)
+            df['Time'] = raw.times
+            df['Signal'] = grand_ave[i, j, :]
+            df1 = df1.append(df)
+        print(j)
+        j = j+1
+df1.to_csv(path_or_buf = tmp_rootdir+'SpeechAdaptationEEG/'+'subj_Test.csv', 
+                          mode = 'a', index = False)
+
+
+# start = 35
+# end = 42
+# j = 0
+# df1 = pd.DataFrame()
+# df = pd.DataFrame(columns = ['Subject', 'Block', 'Cond', 'N1_ave'])
+# for block in Block:
+#     for cond in Test:
+#         for i in range(n_subj):
+#             df['Subject'] = [int(subj_list[i])]
+#             df['Block'] = [block]
+#             df['Cond'] = [cond]
+#             df['N1_ave'] = [np.mean(grand_ave[i, j, start:end])]
+#             df1 = df1.append(df)
+#         print(j)
+#         j = j+1
+# df1.to_csv(path_or_buf = tmp_rootdir+'SpeechAdaptationEEG/'+'subj_N1.csv', 
+#                           mode = 'a', index = False)
+
+
+# start = 64
+# end = 129
+# j = 0
+# df1 = pd.DataFrame()
+# df = pd.DataFrame(columns = ['Subject', 'Block', 'Cond', 'P3_ave'])
+# for block in Block:
+#     for cond in Test:
+#         for i in range(n_subj):
+#             df['Subject'] = [int(subj_list[i])]
+#             df['Block'] = [block]
+#             df['Cond'] = [cond]
+#             df['P3_ave'] = [np.mean(grand_ave[i, j, start:end])]
+#             df1 = df1.append(df)
+#         print(j)
+#         j = j+1
+# df1.to_csv(path_or_buf = tmp_rootdir+'SpeechAdaptationEEG/'+'subj_P3.csv', 
+#                           mode = 'a', index = False)

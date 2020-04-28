@@ -1,0 +1,245 @@
+---
+title: "ERP_smoothing"
+output: html_document
+---
+
+```{r read in the data set}
+rm(list = ls())
+library(plyr)
+library(dplyr)
+library(reshape2)
+library(ggplot2)
+library(timeSeries)
+source('/Users/charleswu/Desktop/MMN/SpeechAdaptationEEG/EEG_helper.R')
+source('/Users/charleswu/Google Drive/HoltLab/CueWeighting/BasicFunctions.R')
+setwd('/Users/charleswu/Desktop/MMN/SpeechAdaptationEEG')
+```
+
+
+
+```{r smoothed MMN responses}
+raw <- read.csv('subj_ERP.csv')
+raw$Signal <- raw$Signal * 10^6
+avespline <- ddply(raw, ~Block+Cond, spline.cis)
+
+a = 10
+###overall plot
+stancolor = 'tomato'
+devcolor = 'blue'
+png('overall_MMN.png', units = 'in', height = 4, width = 6, res = 500)
+ggplot(avespline, aes(x=time,y=signal, group = (Cond:Block), color = Cond, linetype = Block))+
+    geom_line(size = 0.8)+
+    # geom_ribbon(aes(ymin = signal.lower, ymax = signal.upper, fill = Cond), alpha = 0.3)+
+    # labs(title = "Smoothed MMN responses")+
+    #  scale_y_continuous(name = "Amplitude (μV)")+
+      xlab('Time (s)')+
+    scale_color_manual(name = NULL,
+                  breaks = c("Deviant", "Standard"),
+                  values = c(devcolor, stancolor))+
+    # scale_fill_manual(name = NULL,
+    #             breaks = c("Deviant", "Standard"),
+    #             values = c(devcolor, stancolor))+
+    theme_bw()+
+    theme(plot.title = element_text(size = a+5, face = 'bold'), legend.text = element_text( size = a, face = 'bold'), legend.title = element_text(size = a, face = 'bold'), axis.text.x = element_text(size = a, face = 'bold'), axis.text.y = element_text(size = a, face = 'bold'), axis.title = element_text(size = a, face = 'bold'))
+dev.off()
+
+###Plot just the canonical block
+png('can_MMN.png', units = 'in', height = 4, width =6, res = 500)
+ggplot(avespline[avespline$Block == 'Can',], aes(x=time,y=signal, group = Cond, color = Cond))+
+    geom_line()+
+    geom_ribbon(aes(ymin = signal.lower, ymax = signal.upper, fill = Cond), alpha = 0.3)+
+    labs(title = "Smoothed Canonical MMN responses")+
+     scale_y_continuous(name = "Amplitude (μV)")+
+      xlab('Time (s)')+
+    scale_color_manual(name = NULL,
+                  breaks = c("Deviant", "Standard"),
+                  values = c(devcolor, stancolor))+
+    scale_fill_manual(name = NULL,
+                breaks = c("Deviant", "Standard"),
+                values = c(devcolor, stancolor))+
+    theme_bw()+
+    theme(plot.title = element_text(size = a+5, face = 'bold'), legend.text = element_text( size = a, face = 'bold'), legend.title = element_text(size = a, face = 'bold'), axis.text.x = element_text(size = a, face = 'bold'), axis.text.y = element_text(size = a, face = 'bold'), axis.title = element_text(size = a, face = 'bold'))
+dev.off()
+
+###Plot just the reverse block
+png('rev_MMN.png', units = 'in', height = 4, width =6, res = 500)
+ggplot(avespline[avespline$Block == 'Rev',], aes(x=time,y=signal, group = Cond, color = Cond))+
+    geom_line(linetype = 'dashed')+
+    geom_ribbon(aes(ymin = signal.lower, ymax = signal.upper, fill = Cond), linetype = 'dashed', alpha = 0.3)+
+    labs(title = "Smoothed Reverse MMN responses")+
+     scale_y_continuous(name = "Amplitude (μV)")+
+      xlab('Time (s)')+
+    scale_color_manual(name = NULL,
+                  breaks = c("Deviant", "Standard"),
+                  values = c(devcolor, stancolor))+
+    scale_fill_manual(name = NULL,
+                    breaks = c("Deviant", "Standard"),
+                    values = c(devcolor, stancolor))+
+    theme_bw()+
+    theme(plot.title = element_text(size = a+5, face = 'bold'), legend.text = element_text( size = a, face = 'bold'), legend.title = element_text(size = a, face = 'bold'), axis.text.x = element_text(size = a, face = 'bold'), axis.text.y = element_text(size = a, face = 'bold'), axis.title = element_text(size = a, face = 'bold'))
+dev.off()
+```
+
+
+```{r difference wave amplitude}
+png('Diff_wave.png', units = 'in', height = 4, width = 5, res = 500)
+diff_wave <- ddply(avespline, ~Block+time, summarise, diff = -diff(signal))
+ggplot(diff_wave, aes(x=time,y=diff, group = Block, linetype = Block))+
+    geom_line(size = 0.8)+
+    xlab('Time (s)')+
+    # scale_color_manual(name = NULL,
+    #               breaks = c("Deviant", "Standard"),
+    #               values = c(devcolor, stancolor))+
+    # scale_fill_manual(name = NULL,
+    #             breaks = c("Deviant", "Standard"),
+    #             values = c(devcolor, stancolor))+
+    scale_y_continuous(name = 'Deviant - Standard')+
+    scale_x_continuous(breaks = seq(-0.2, 0.5, 0.1))+
+    theme_bw()+
+    theme(plot.title = element_text(size = a+5, face = 'bold'), legend.text = element_text( size = a, face = 'bold'), legend.title = element_text(size = a, face = 'bold'), axis.text.x = element_text(size = a, face = 'bold'), axis.text.y = element_text(size = a, face = 'bold'), axis.title = element_text(size = a, face = 'bold'))
+dev.off()
+```
+
+
+```{r MMN peak amplitude boxplots}
+MMN_window <- raw$Time[raw$Time >= 0.1484375 & raw$Time < 0.359375]
+
+raw %>%
+  subset(raw$Time %in% MMN_window) %>%
+  ddply(., ~Subject+Block+Cond, summarise, peak = min(Signal)) %>%
+  ddply(., ~Subject+Block, summarise, diff = -diff(peak)) -> peak_amp
+
+png('peak_diff_box.png', units = 'in', height = 4, width = 4, res = 500)
+ggplot(peak_amp, aes(Block, diff))+
+  geom_violin(trim=FALSE, fill = 'skyblue1', alpha = 0.5)+
+  geom_boxplot(width=0.1, position = position_dodge(0.9), fill = 'skyblue1', alpha = 0.5)+
+  geom_hline(yintercept = 0, linetype = 'dashed')+
+  scale_y_continuous(name = 'deviant peak - standard peak')+
+  geom_text(x = 'Can', y = 1.8, label = '*p = 0.051 (permutation test)*', color = 'black', size = 3)+
+  geom_text(x = 'Rev', y = 1.8, label = '*p > 0.05 (permutation test)*', color = 'black', size = 3)+
+  theme_bw()+
+  theme(plot.title = element_text(size = a+5, face = 'bold'), legend.position = 'none', legend.text = element_text( size = a, face = 'bold'), legend.title = element_text(size = a, face = 'bold'), axis.text.x = element_text(size = a, face = 'bold'), axis.text.y = element_text(size = a, face = 'bold'), axis.title = element_text(size = a, face = 'bold'))
+dev.off()
+```
+
+
+
+```{r smoothed Test ERP responses}
+Test <- read.csv('subj_Test.csv')
+Test$Signal <- Test$Signal * 10^6
+
+test_spline <- ddply(Test, ~Block+Cond, spline.cis)
+
+test2color = 'purple'
+test1color = 'orange'
+
+###plot only the canonical test ERP
+png('can_Test.png', units = 'in', height = 4, width =6, res = 500)
+ggplot(test_spline[test_spline$Block == 'Can',], aes(x=time,y=signal, group = Cond, color = Cond))+
+    geom_line()+
+    geom_ribbon(aes(ymin = signal.lower, ymax = signal.upper, fill = Cond), alpha = 0.3)+
+    labs(title = "Smoothed canonical test responses")+
+     scale_y_continuous(name = "Amplitude (μV)")+
+      xlab('Time (s)')+
+    scale_color_manual(name = NULL,
+                  breaks = c("Test2", "Test1"),
+                  values = c(test2color, test1color),
+                  labels = c("HighF0", "LowF0"))+
+    scale_fill_manual(name = NULL,
+                breaks = c("Test2", "Test1"),
+                values = c(test2color, test1color),
+                labels = c("HighF0", "LowF0"))+
+    theme_bw()+
+    theme(plot.title = element_text(size = a+5, face = 'bold'), legend.text = element_text( size = a, face = 'bold'), legend.title = element_text(size = a, face = 'bold'), axis.text.x = element_text(size = a, face = 'bold'), axis.text.y = element_text(size = a, face = 'bold'), axis.title = element_text(size = a, face = 'bold'))
+dev.off()
+
+
+###plot only the reverse test ERP
+png('rev_Test.png', units = 'in', height = 4, width =6, res = 500)
+ggplot(test_spline[test_spline$Block == 'Rev',], aes(x=time,y=signal, group = Cond, color = Cond))+
+    geom_line(linetype = 'dashed')+
+    geom_ribbon(aes(ymin = signal.lower, ymax = signal.upper, fill = Cond),linetype = 'dashed', alpha = 0.3)+
+    labs(title = "Smoothed reverse test responses")+
+     scale_y_continuous(name = "Amplitude (μV)")+
+      xlab('Time (s)')+
+    scale_color_manual(name = NULL,
+                  breaks = c("Test2", "Test1"),
+                  values = c(test2color, test1color),
+                  labels = c("HighF0", "LowF0"))+
+    scale_fill_manual(name = NULL,
+                breaks = c("Test2", "Test1"),
+                values = c(test2color, test1color),
+                labels = c("HighF0", "LowF0"))+
+    theme_bw()+
+    theme(plot.title = element_text(size = a+5, face = 'bold'), legend.text = element_text( size = a, face = 'bold'), legend.title = element_text(size = a, face = 'bold'), axis.text.x = element_text(size = a, face = 'bold'), axis.text.y = element_text(size = a, face = 'bold'), axis.title = element_text(size = a, face = 'bold'))
+dev.off()
+
+
+###plot over all test ERP
+png('overall_Test.png', units = 'in', height = 4, width =6, res = 500)
+ggplot(test_spline, aes(x=time,y=signal, group = (Cond:Block), color = Cond, linetype = Block))+
+    geom_line(size = 0.8)+
+    #geom_ribbon(aes(ymin = signal.lower, ymax = signal.upper, linetype = Block, fill = Cond), alpha = 0.3)+
+    labs(title = "Smoothed Test responses")+
+     scale_y_continuous(name = "Amplitude (μV)")+
+      xlab('Time (ms)')+
+    scale_color_manual(name = NULL,
+                  breaks = c("Test2", "Test1"),
+                  values = c(test2color, test1color),
+                  labels = c("HighF0", "LowF0"))+
+    # scale_fill_manual(name = NULL,
+    #             breaks = c("Test2", "Test1"),
+    #             values = c(test2color, test1color),
+    #             labels = c("HighF0", "LowF0"))+
+    theme_bw()+
+    theme(plot.title = element_text(size = a+5, face = 'bold'), legend.text = element_text( size = a, face = 'bold'), legend.title = element_text(size = a, face = 'bold'), axis.text.x = element_text(size = a, face = 'bold'), axis.text.y = element_text(size = a, face = 'bold'), axis.title = element_text(size = a, face = 'bold'))
+dev.off()
+```
+
+
+
+
+```{r N1-P3 average amplitude boxplot}
+raw_n1 <- read.csv('subj_N1.csv')
+raw_p3 <- read.csv('subj_P3.csv')
+raw_n1$N1_ave <- raw_n1$N1_ave * 10^6
+raw_p3$P3_ave <- raw_p3$P3_ave * 10^6
+
+###plot N1 amplitude differences between conditions
+N1_diff <- ddply(raw_n1, ~Subject + Block, summarise, diff = diff(N1_ave))
+png('N1_diff.png', units = 'in', height = 4, width = 4, res = 500)
+ggplot(N1_diff, aes(Block, diff))+
+  geom_violin(trim=FALSE, fill = 'yellow', alpha = 0.3)+
+  geom_boxplot(width=0.1, position = position_dodge(0.9), fill = 'yellow', alpha = 0.3)+
+  #geom_hline(yintercept = 0, linetype = 'dashed')+
+  scale_y_continuous(name = 'HighF0 - LowF0')+
+  geom_text(aes(x = 'Can', y = 3.6, label = '*p = 0.02 (permutation test)*', color = 'black', size = 3, hjust = 0.1))+
+  labs(title = "N100 amplitude difference")+
+  theme_bw()+
+  theme(plot.title = element_text(size = a+5, face = 'bold'), legend.position = 'none', legend.text = element_text( size = a, face = 'bold'), legend.title = element_text(size = a, face = 'bold'), axis.text.x = element_text(size = a, face = 'bold'), axis.text.y = element_text(size = a, face = 'bold'), axis.title = element_text(size = a, face = 'bold'))
+dev.off()
+
+###plot P3 amplitude differences between conditions
+P3_diff <- ddply(raw_p3, ~Subject + Block, summarise, diff = diff(P3_ave))
+png('P3_diff.png', units = 'in', height = 4, width = 4, res = 500)
+ggplot(P3_diff, aes(Block, diff))+
+  geom_violin(trim=FALSE, fill = 'green', alpha = 0.3)+
+  geom_boxplot(width=0.1, position = position_dodge(0.9), fill = 'green', alpha = 0.3)+
+  #geom_hline(yintercept = 0, linetype = 'dashed')+
+  scale_y_continuous(name = 'HighF0 - LowF0')+
+  geom_text(aes(x = 'Can', y = 7.3, label = '*p = 0.007 (permutation test)*', color = 'black', size = 3, hjust = 0.1))+
+  labs(title = "P300 amplitude difference")+
+  theme_bw()+
+  theme(plot.title = element_text(size = a+5, face = 'bold'), legend.position = 'none', legend.text = element_text( size = a, face = 'bold'), legend.title = element_text(size = a, face = 'bold'), axis.text.x = element_text(size = a, face = 'bold'), axis.text.y = element_text(size = a, face = 'bold'), axis.title = element_text(size = a, face = 'bold'))
+dev.off()
+
+```
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

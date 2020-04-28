@@ -87,7 +87,7 @@ def permutation_test(data, statistic = 'difference', n_perm = 10000):
 			test_stat.append(stat)
 		p_vals = 1-np.sum(obs < test_stat)/len(test_stat)
 
-	if statistic == 'mean':
+	elif statistic == 'mean':
 		##testing whether the mean amplitude is different between conditions
 		# obs = np.amin(np.mean(cond1, axis = 0)) - np.amin(np.mean(cond2, axis = 0))
 		# for i in range(n_perm):

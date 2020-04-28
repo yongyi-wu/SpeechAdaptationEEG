@@ -93,7 +93,6 @@ diff_rev = np.array(diff_rev)
 
 p_vals, obs, test_stat = helper.permutation_test([diff_can, diff_rev])
 # p_adj = multipletests(, alpha = 0.05, method = 'fdr_bh') 
-#p_adj = multipletests(p_vals[50:77], alpha = 0.05, method = 'fdr_bh')
 
 times = raw.times
 print(times[52], times[64])

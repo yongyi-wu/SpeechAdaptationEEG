@@ -86,19 +86,47 @@ for i in range(n_subj):
     for i in range(len(event)):
         epoch.append(raw[event[i]].average().data)
     ave = helper.get_mean_evoked(chan_idx, epoch)
+    
+    # df = pd.DataFrame(np.repeat([[subj], [block], [condition]], np.shape(ave)[0], axis = 1).T)
     grand_ave = np.append(grand_ave, [ave], axis = 0)
 
 ##45:71 take the time window from 150-350ms suggested in Moberly et al
 start = 45
-end = 71
+end = 72
 can_stand = grand_ave[:,0,start:end]
 can_dev = grand_ave[:, 1, start:end]
 rev_stand = grand_ave[:,2,start:end]
 rev_dev = grand_ave[:,3,start:end]
 
-p_val, obs, test_stat = np.array(helper.permutation_test([can_dev, can_stand], statistic = 'min'))
-print(p_val) 
+# df = pd.DataFrame(np.repeat([[subj], [block], [condition]], np.shape(ave)[1], axis = 1).T)
+
+p_val, obs, test_stat = helper.permutation_test([can_dev, can_stand], statistic = 'min')
+print(p_val)
+
+p_val1, obs, test_stat = helper.permutation_test([rev_dev, rev_stand], statistic = 'min') 
+print(p_val1)
 ## calculate the mean peak amplitude first and find a marginal difference between can and rev peak amplitudes
 ###p = 0.059. Note that the pvals are stochastic and I didn't fix a random state here so it will be slight different every time I run it. 
 
+###save dataframe for R processing
+# t = np.shape(grand_ave)[2]
+# j = 0
+# df1 = pd.DataFrame()
+# df = pd.DataFrame(columns = ['Subject', 'Block', 'Cond', 'Time', 'Signal'])
+# for block in Block:
+#     for cond in MMN:
+#         for i in range(n_subj):
+#             print(subj_list[i])
+#             df['Subject'] = np.repeat(int(subj_list[i]), t)
+#             df['Block'] = np.repeat(block, t)
+#             df['Cond'] = np.repeat(cond, t)
+#             df['Time'] = raw.times
+#             df['Signal'] = grand_ave[i, j, :]
+#             df1 = df1.append(df)
+#         print(j)
+#         j = j+1
+# df1.to_csv(path_or_buf = tmp_rootdir+'SpeechAdaptationEEG/'+'subj_ERP.csv', 
+#                          mode = 'a', index = False)
+
+        
 
