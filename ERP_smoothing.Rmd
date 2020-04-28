@@ -206,6 +206,7 @@ raw_n1$N1_ave <- raw_n1$N1_ave * 10^6
 raw_p3$P3_ave <- raw_p3$P3_ave * 10^6
 
 ###plot N1 amplitude differences between conditions
+a = 15
 N1_diff <- ddply(raw_n1, ~Subject + Block, summarise, diff = diff(N1_ave))
 png('N1_diff.png', units = 'in', height = 4, width = 4, res = 500)
 ggplot(N1_diff, aes(Block, diff))+
