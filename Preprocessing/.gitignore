@@ -1,0 +1,4 @@
+*.pyc
+Examine.py
+.pynb_checkpoints
+__pycache__
